@@ -32,6 +32,7 @@ class PostOut(BaseModel):
 
 class TokenData(BaseModel):
     username: str
+    password: str
 
 
 class Token(BaseModel):

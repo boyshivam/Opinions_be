@@ -5,7 +5,6 @@ from sqlalchemy.engine import URL
 
 
 
-# DATABASE_URL = f"postgresql+psycopg://{settings.db_username}:{settings.db_password}@localhost:{settings.db_port}/{settings.db_name}"
 
 DATABASE_URL = URL.create(
     drivername="postgresql+psycopg",
@@ -29,3 +28,4 @@ def get_db():
         yield db
     finally:
         db.close()
+        

@@ -23,14 +23,15 @@ def login_user(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Sess
         raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= "user not found")
 
     if not utils.verifyPasscode(user_credentials.password, user.password):
-        raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= "Invalid credentials")
+        raise HTTPException(status_code= status.HTTP_401_UNAUTHORIZED, detail= "Invalid passcode")
 
 
     access_token = oauth2.create_access_token({
-        "username" : user_credentials.username
+        "username" : user_credentials.username,
+        "password" : user_credentials.password
     })
 
     return {
-        "Access Token" : access_token,
+        "access_token" : access_token,
         "token_type" : "Bearer"
     }

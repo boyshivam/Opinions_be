@@ -33,11 +33,13 @@ def verify_access_token(token: str, db: Session = Depends(database.get_db)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms= [ALGORITHM])
         username_p: str = payload.get("username")
+        password_p: str = payload.get("password")
         if username_p is None:
             raise HTTPException(
-                404, detail="Credentials invalid"
+                404, detail="Credentials invalid",
+        
             )
-        token_data = schemas.TokenData(username = username_p)
+        token_data = schemas.TokenData(username = username_p, password = password_p)
     except InvalidTokenError:
         raise HTTPException(
                         404, detail="Credentials invalid"
@@ -51,14 +53,14 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session 
 
     token_data = verify_access_token(token=token)
 
+    print(token_data)
+
     if token_data is None:
         raise  HTTPException(
-                        404, detail="Credentials invalid"
+                        401, detail="Credentials invalid"
                     )        
 
     user = db.query(models.User).filter(models.User.username == token_data.username).first()
-    
-
     return user
 
 

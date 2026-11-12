@@ -16,7 +16,11 @@ router = APIRouter(
 
 ## fetch all posts in the db
 @router.get("/", response_model= List[schemas.PostOut])
-def getAllPosts(search:str = "", limit: int = Query(default = 10, ge = 0), offset: int = Query(default = 0, ge = 0),  db: Session = Depends(get_db), get_current_user: str = Depends(oauth2.get_current_user)):
+def getAllPosts(search:str = "", 
+                limit: int = Query(default = 10, ge = 0), 
+                offset: int = Query(default = 0, ge = 0),  
+                db: Session = Depends(get_db), 
+                get_current_user: str = Depends(oauth2.get_current_user)):
     posts = db.query(models.Post,
                         func.count(models.Vote.post_id).label("Votes")).join(models.Vote, models.Vote.post_id == models.Post.id, isouter =
                                                                                           True).group_by(models.Post.id).filter(models.Post.title.contains(search)).limit(limit).offset(offset).all()
@@ -56,8 +60,9 @@ def createAPost(newPost: schemas.NewPost, db: Session = Depends(get_db),
     db.add(post)
     db.commit()
     db.refresh(post)
-
     return post
+
+
 
 
 ## update an existing post in db by searching id

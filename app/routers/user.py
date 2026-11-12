@@ -24,7 +24,6 @@ def addUser(new_user: schemas.NewUser, db: Session = Depends(get_db)):
         username = new_user.username,
         password = hashedPass,
 
-    
     )
 
     db.add(user)
@@ -40,13 +39,25 @@ def addUser(new_user: schemas.NewUser, db: Session = Depends(get_db)):
 
 
 ## fetch a single user by id
-@router.get("/{id}")
-def fetchUser(id: int, db: Session = Depends(get_db)):
+@router.get("/{username}/{password}")
+def fetchUser(username: str, password: str,  db: Session = Depends(get_db)):
 
-    user = db.scalar(select(User).where(User.id == id))
+    user = db.scalar(select(User).where(User.username == username))
 
-    if not user:
-        raise HTTPException(status_code = 404, detail=f"User with id {id} does not exist")
+
+    if user is None:
+        raise HTTPException(
+            status_code = 404, 
+            detail=f"User with username {username} does not exist")
+
+    check_passcode = utils.verifyPasscode(password, user.password)
+
+    if not check_passcode:
+        raise HTTPException(
+            status_code= 401,
+            detail= f"Incorrect passcode!"
+        )
+    
     return user
 
 
@@ -87,11 +98,11 @@ def editUser(updatedData: schemas.NewUser, id: int, db: Session  = Depends(get_d
 
 
 ## delete a user
-@router.delete("/{id}")
-def deleteUser(id: int, db: Session = Depends(get_db)):
+@router.delete("/{username}")
+def deleteUser(username: str, db: Session = Depends(get_db)):
 
 
-    user = db.query(User).filter(User.id == id).first()
+    user = db.query(User).filter(User.username == username).first()
 
     if not user:
         raise HTTPException(
